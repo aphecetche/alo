@@ -5,6 +5,7 @@ branches:
   - testci
 
 before_install:
+  - eval "${MATRIX_EVAL}"
   - pip install alibuild
   - aliBuild analytics off
   - git clone https://github.com/alisw/alidist.git
@@ -15,3 +16,15 @@ script:
 after_script:
   - ls -alR $HOME
 
+matrix:
+  include:
+    # works on Precise and Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
