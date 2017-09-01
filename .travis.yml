@@ -12,6 +12,9 @@ install:
 script:
   - aliBuild --defaults alo build ROOT
 
+after_script:
+  - ls $HOME
+
 cache:
   directories:
   - $HOME/sw/TARS
