@@ -13,7 +13,9 @@ addons:
       - gcc-5
       - g++-5
       - gfortran-5
-      - libtool 
+      - libperl-dev
+      - python-dev
+      - environment-modules 
       - pkg-config 
       - build-essential 
       - autoconf 
@@ -22,8 +24,6 @@ addons:
       - texinfo
       - gettext
       - libtool
-      - uuid-dev
-      - cmake3
 
 branches:
   only:
