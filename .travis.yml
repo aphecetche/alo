@@ -35,7 +35,7 @@ before_install:
   - pip install alibuild
   - aliBuild analytics off
   - echo $HOME
-  - cd $HOME && git clone https://github.com/alisw/alidist.git
+  - cd $HOME/bin && git clone https://github.com/alisw/alidist.git
   - printenv
   - cd $HOME/bin
   - ln -si /usr/bin/gcc-5 cc
@@ -47,9 +47,9 @@ script:
   - cd $HOME
   - which cc
   - echo $PATH | tr ":" "\n"
+  - cd $HOME/build
   - aliDoctor alo
-
-#- aliBuild --defaults alo build alo
+  - aliBuild --defaults alo build alo
 
 after_script:
-  - tree $HOME -L 2
+  - tree $HOME -L 3
