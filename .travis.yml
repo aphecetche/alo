@@ -48,8 +48,5 @@ before_install:
 script:
   - cd $HOME
   - which cc
-  - aliDoctor alo
-
-after_script:
-  - echo "after_script would go here"
+  - aliBuild --defaults alo build alo
 
