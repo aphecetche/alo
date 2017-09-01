@@ -10,13 +10,20 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
+      - gcc-5
       - g++-5
+      - gfortran-5
       - libtool 
       - pkg-config 
       - build-essential 
       - autoconf 
       - automake 
+      - autopoint
+      - texinfo
+      - gettext
+      - libtool
       - uuid-dev
+      - cmake3
 
 branches:
   only:
@@ -36,5 +43,5 @@ script:
   - aliDoctor alo
 
 after_script:
-  - ls -alR $HOME
+  - echo "after_script would go here"
 
