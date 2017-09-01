@@ -24,6 +24,7 @@ addons:
       - texinfo
       - gettext
       - libtool
+      - swig
 
 branches:
   only:
@@ -38,8 +39,15 @@ before_install:
   - echo $HOME
   - cd $HOME && git clone https://github.com/alisw/alidist.git
   - printenv
+  - cd $HOME/bin
+  - ln -si /usr/bin/gcc-5 cc
+  - ln -si /usr/bin/g++-5 c++
+  - ln -si /usr/bin/gfortran-5 gfortran
+  - "export PATH=$HOME:$PATH" >> $HOME/.bashrc
 
 script:
+  - cd $HOME
+  - which cc
   - aliDoctor alo
 
 after_script:
