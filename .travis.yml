@@ -1,0 +1,17 @@
+language: cpp
+
+branches:
+  only:
+  - testci
+
+before_install:
+  - pip install alibuild && aliBuild analytics off
+
+install:
+
+script:
+  - aliBuild --defaults alo build ROOT
+
+cache:
+  directories:
+  - $HOME/sw/TARS
