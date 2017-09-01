@@ -9,14 +9,9 @@ before_install:
   - aliBuild analytics off
   - git clone https://github.com/alisw/alidist.git
 
-install:
-
 script:
-  - aliBuild --defaults alo build ROOT
+  - aliDoctor ROOT
 
 after_script:
   - ls -alR $HOME
 
-cache:
-  directories:
-  - $HOME/sw/TARS
