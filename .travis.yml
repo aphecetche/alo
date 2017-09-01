@@ -5,7 +5,9 @@ branches:
   - testci
 
 before_install:
-  - pip install alibuild && aliBuild analytics off
+  - pip install alibuild
+  - aliBuild analytics off
+  - git clone https://github.com/alisw/alidist.git
 
 install:
 
@@ -13,7 +15,7 @@ script:
   - aliBuild --defaults alo build ROOT
 
 after_script:
-  - ls $HOME
+  - ls -alR $HOME
 
 cache:
   directories:
