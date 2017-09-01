@@ -1,21 +1,5 @@
 language: cpp
 
-branches:
-  only:
-  - testci
-
-before_install:
-  - eval "${MATRIX_EVAL}"
-  - pip install alibuild
-  - aliBuild analytics off
-  - git clone https://github.com/alisw/alidist.git
-
-script:
-  - aliDoctor ROOT
-
-after_script:
-  - ls -alR $HOME
-
 addons:
   apt:
     sources:
@@ -24,4 +8,21 @@ addons:
       - g++-5
     env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+
+branches:
+  only:
+  - testci
+
+before_install:
+  - eval "${MATRIX_EVAL}"
+  - pip install alibuild
+  - aliBuild analytics off
+  - cd $HOME && git clone https://github.com/alisw/alidist.git
+  - printenv
+
+script:
+  - aliDoctor ROOT
+
+after_script:
+  - ls -alR $HOME
 
