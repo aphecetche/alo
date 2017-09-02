@@ -29,6 +29,8 @@ branches:
   - testci
 
 before_install:
+  - echo "export PATH=$HOME:$PATH" >> $HOME/.bashrc
+  - cd $HOME/bin
   - ln -si /usr/bin/gcc-5 cc
   - ln -si /usr/bin/g++-5 c++
   - ln -si /usr/bin/gfortran-5 gfortran
@@ -36,8 +38,6 @@ before_install:
   - aliBuild analytics off
   - cd $HOME/build 
   - git clone https://github.com/alisw/alidist.git
-  - cd $HOME/bin
-  - echo "export PATH=$HOME:$PATH" >> $HOME/.bashrc
 
 script:
   - cd $HOME
