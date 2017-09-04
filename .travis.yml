@@ -36,15 +36,12 @@ before_install:
   - ln -si /usr/bin/gfortran-6 gfortran
   - pip install alibuild
   - aliBuild analytics off
-  - cd $HOME/build 
+  - mkdir -p $HOME/build/aphecetche 
+  - cd $HOME/build/aphecetche 
   - git clone https://github.com/alisw/alidist.git
 
 script:
-  - cd $HOME
-  - which cc
-  - echo $PATH | tr ":" "\n"
-  - cd $HOME/build
-  - aliDoctor --defaults alo alo
+  - cd $HOME/build/aphecetche 
   - aliBuild --defaults alo build alo
 
 after_script:
