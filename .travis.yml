@@ -7,9 +7,9 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - gcc-5
-      - g++-5
-      - gfortran-5
+      - gcc-6
+      - g++-6
+      - gfortran-6
       - libperl-dev
       - python-dev
       - environment-modules 
@@ -31,9 +31,9 @@ branches:
 before_install:
   - echo "export PATH=$HOME/bin:$PATH" >> $HOME/.bashrc
   - cd $HOME/bin
-  - ln -si /usr/bin/gcc-5 cc
-  - ln -si /usr/bin/g++-5 c++
-  - ln -si /usr/bin/gfortran-5 gfortran
+  - ln -si /usr/bin/gcc-6 cc
+  - ln -si /usr/bin/g++-6 c++
+  - ln -si /usr/bin/gfortran-6 gfortran
   - pip install alibuild
   - aliBuild analytics off
   - cd $HOME/build 
