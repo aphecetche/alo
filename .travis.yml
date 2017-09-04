@@ -30,9 +30,13 @@ branches:
 
 before_install:
   - echo "export PATH=$HOME/bin:$PATH" >> $HOME/.bashrc
+  - echo "export CC=/usr/bin/gcc-6" >> $HOME/.bashrc
+  - echo "export CXX=/usr/bin/g++-6" >> $HOME/.bashrc
   - cd $HOME/bin
   - ln -si /usr/bin/gcc-6 cc
+  - ln -si /usr/bin/gcc-6 gcc
   - ln -si /usr/bin/g++-6 c++
+  - ln -si /usr/bin/g++-6 g++
   - ln -si /usr/bin/gfortran-6 gfortran
   - pip install alibuild
   - aliBuild analytics off
