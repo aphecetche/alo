@@ -29,7 +29,7 @@ branches:
   - testci
 
 before_install:
-  - echo "export PATH=$HOME:$PATH" >> $HOME/.bashrc
+  - echo "export PATH=$HOME/bin:$PATH" >> $HOME/.bashrc
   - cd $HOME/bin
   - ln -si /usr/bin/gcc-5 cc
   - ln -si /usr/bin/g++-5 c++
@@ -44,7 +44,7 @@ script:
   - which cc
   - echo $PATH | tr ":" "\n"
   - cd $HOME/build
-  - aliDoctor alo
+  - aliDoctor --defaults alo alo
   - aliBuild --defaults alo build alo
 
 after_script:
