@@ -46,6 +46,9 @@ before_install:
 
 script:
   - cd $HOME/build/aphecetche 
+  - export PATH=$HOME/bin:$PATH
+  - export CC=/usr/bin/gcc-6
+  - export CXX=/usr/bin/g++-6
   - aliBuild --defaults alo build alo
 
 after_script:
