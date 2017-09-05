@@ -51,6 +51,20 @@ script:
   - export CC=/usr/bin/gcc-6
   - export CXX=/usr/bin/g++-6
   - rm -rf $HOME/build/aphecetche/sw/BUILD/CMake*
+  - aliBuild --defaults alo build CMake
+  - aliBuild --defaults alo build protobuf
+  - aliBuild --defaults alo build ZeroMQ
+  - aliBuild --defaults alo build boost
+  - aliBuild --defaults alo build GSL
+  - aliBuild --defaults alo build googletest
+  - aliBuild --defaults alo build Vc
+  - aliBuild --defaults alo build RapidJSON
+  - aliBuild --defaults alo build nanomsg
+  - aliBuild --defaults alo build DDS
+  - aliBuild --defaults alo build ROOT
+  - aliBuild --defaults alo build AliRoot
+  - aliBuild --defaults alo build FairRoot
+  - aliBuild --defaults alo build O2
   - aliBuild --defaults alo build alo
 
 after_script:

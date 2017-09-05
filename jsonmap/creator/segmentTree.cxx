@@ -21,7 +21,12 @@ namespace o2 {
 namespace mch {
 namespace geometry {
 
-Node::Node(int b, int e) : mBegin(b), mEnd(e), mCardinality(0), mPotent(false), mLeftChild(nullptr), mRightChild(nullptr)
+Node::Node(int b, int e) : mBegin(b),
+                           mEnd(e),
+                           mCardinality(0),
+                           mPotent(false),
+                           mLeftChild(nullptr),
+                           mRightChild(nullptr)
 {
   if (b > e) { throw std::invalid_argument("begin should be < end"); }
 }
@@ -32,6 +37,7 @@ Node::~Node()
   delete mRightChild;
 
 }
+
 bool Node::isFullyContainedInInterval(int b, int e) const
 {
   // returns true if this node's interval is fully contained within interval [b,e]
@@ -55,26 +61,33 @@ void Node::insertInterval(int b, int e)
 
 void Node::deleteInterval(int b, int e)
 {
-  throw;
+  if (isFullyContainedInInterval(b, e)) {
+    --mCardinality;
+  } else {
+    if (mCardinality > 0) {
+      demote();
+    }
+    if (b < midpoint()) {
+      mLeftChild->deleteInterval(b, e);
+    }
+    if (midpoint() < e) {
+      mRightChild->deleteInterval(b, e);
+    }
+  }
+  update();
 }
 
 void Node::update()
 {
-  if (mLeftChild==nullptr)
-  {
+  if (mLeftChild == nullptr) {
     mPotent = false;
-  }
-  else
-  {
-    if (mLeftChild->mCardinality > 0 && mRightChild > 0 ) {
+  } else {
+    if (mLeftChild->mCardinality > 0 && mRightChild > 0) {
       promote();
     }
-    if ( !mLeftChild->isActive() && !mRightChild->isActive() )
-    {
+    if (!mLeftChild->isActive() && !mRightChild->isActive()) {
       mPotent = false;
-    }
-    else
-    {
+    } else {
       mPotent = true;
     }
   }

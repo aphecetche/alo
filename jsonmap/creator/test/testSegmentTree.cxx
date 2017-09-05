@@ -37,8 +37,22 @@ using namespace o2::mch::geometry;
 
 struct YPOS
 {
+    YPOS()
+    {
+
+      testNode.mLeftChild = new Node{0, 4};
+      testNode.mRightChild = new Node{4, 8};
+
+      testNode.mLeftChild->mCardinality = dummyCardinality;
+      testNode.mRightChild->mCardinality = dummyCardinality;
+
+    }
+
     std::vector<double> ypos{0, 1, 2, 3, 4, 5, 6, 7, 8};
     Node node{0, 8};
+    Node testNode{0, 8};
+    int dummyCardinality{3};
+
 };
 
 BOOST_AUTO_TEST_SUITE(o2_mch_geometry)
@@ -61,15 +75,19 @@ BOOST_AUTO_TEST_CASE(NodeIsFullyContainedInInterval)
   BOOST_CHECK_EQUAL(Node(1, 2).isFullyContainedInInterval(1, 5), true);
 }
 
-//BOOST_AUTO_TEST_CASE(NodeInsert)
-//{
-//  SegmentTree t(ypos);
-//
-//  t.insertInterval(1, 5);
-//  t.insertInterval(5, 8);
-//
-//  std::cout << t << '\n';
-//}
+BOOST_AUTO_TEST_CASE(NodeInsertAndDelete)
+{
+  SegmentTree t(ypos);
+
+  t.insertInterval(1, 5);
+  t.insertInterval(5, 8);
+
+  std::cout << t << '\n';
+
+  t.deleteInterval(6, 7);
+
+  std::cout << t << '\n';
+}
 
 BOOST_AUTO_TEST_CASE(JustCreatedNodeIsNotPotent)
 {
@@ -83,19 +101,21 @@ BOOST_AUTO_TEST_CASE(JustCreatedNodeHasCardinalityEqualsZero)
 
 BOOST_AUTO_TEST_CASE(PromoteNode)
 {
-  Node node{0, 8};
-  int dummyCardinality{3};
+  testNode.promote();
 
-  node.mLeftChild = new Node(0, 4);
-  node.mRightChild = new Node(4, 8);
+  BOOST_CHECK_EQUAL(testNode.mCardinality, 1);
+  BOOST_CHECK_EQUAL(testNode.mLeftChild->mCardinality, dummyCardinality - 1);
+  BOOST_CHECK_EQUAL(testNode.mRightChild->mCardinality, dummyCardinality - 1);
+}
 
-  node.mLeftChild->mCardinality = dummyCardinality;
-  node.mLeftChild->mCardinality = dummyCardinality;
-
-  node.promote();
-
-  BOOST_CHECK_EQUAL(node.mCardinality, 1);
-  BOOST_CHECK_EQUAL(node.mLeftChild->mCardinality, dummyCardinality - 1);
+BOOST_AUTO_TEST_CASE(DemoteNode)
+{
+  testNode.promote();
+  testNode.demote();
+  BOOST_CHECK_EQUAL(testNode.mCardinality, 0);
+  BOOST_CHECK_EQUAL(testNode.mLeftChild->mCardinality, dummyCardinality);
+  BOOST_CHECK_EQUAL(testNode.mRightChild->mCardinality, dummyCardinality);
+  BOOST_CHECK_EQUAL(testNode.mPotent, true);
 }
 
 //BOOST_AUTO_TEST_CASE(BuildSegmentTree)
