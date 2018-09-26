@@ -9,6 +9,7 @@ FOREACH (p
         CMP0028 # CMake 3.0
         CMP0063 # honor visibility settings also for static libs
         CMP0057 # for doxygen
+        CMP0074
         )
     IF (POLICY ${p})
         cmake_policy(SET ${p} NEW)

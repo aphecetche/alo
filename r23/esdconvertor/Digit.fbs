@@ -1,0 +1,15 @@
+namespace o2.mch;
+
+table Digit {
+  uid:int;
+  adc:int;
+}
+
+table DigitEvent {
+  bendingDigits:[Digit];
+  nonBendingDigits:[Digit];
+}
+
+root_type DigitEvent;
+
+

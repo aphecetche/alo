@@ -1,0 +1,55 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BOOST_AUTO_TEST_CASE	test_FileCreation.cxx	/^BOOST_AUTO_TEST_CASE(fileCreationShouldCreateDistinctFiles) {$/;"	f
+BOOST_TEST_DYN_LINK	test_FileCreation.cxx	2;"	d	file:
+BOOST_TEST_MODULE	test_FileCreation.cxx	1;"	d	file:
+ConvertESDTrack	ConvertESDTrack.C	/^void ConvertESDTrack(TString esdFileName, TString outFileName = "AliESDs.in",$/;"	f
+CreateDigit	Digit_generated.h	/^inline flatbuffers::Offset<Digit> CreateDigit($/;"	f	namespace:o2::mch
+CreateDigitEvent	Digit_generated.h	/^inline flatbuffers::Offset<DigitEvent> CreateDigitEvent($/;"	f	namespace:o2::mch
+CreateDigitEventDirect	Digit_generated.h	/^inline flatbuffers::Offset<DigitEvent> CreateDigitEventDirect($/;"	f	namespace:o2::mch
+DigitBuilder	Digit_generated.h	/^  explicit DigitBuilder(flatbuffers::FlatBufferBuilder &_fbb)$/;"	f	struct:o2::mch::DigitBuilder
+DigitBuilder	Digit_generated.h	/^struct DigitBuilder {$/;"	s	namespace:o2::mch
+DigitEventBuilder	Digit_generated.h	/^  explicit DigitEventBuilder(flatbuffers::FlatBufferBuilder &_fbb)$/;"	f	struct:o2::mch::DigitEventBuilder
+DigitEventBuilder	Digit_generated.h	/^struct DigitEventBuilder {$/;"	s	namespace:o2::mch
+FILECREATION_H	FileCreation.h	2;"	d
+FLATBUFFERS_FINAL_CLASS	Digit_generated.h	/^struct Digit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {$/;"	s	namespace:o2::mch
+FLATBUFFERS_FINAL_CLASS	Digit_generated.h	/^struct DigitEvent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {$/;"	s	namespace:o2::mch
+FLATBUFFERS_GENERATED_DIGIT_O2_MCH_H_	Digit_generated.h	5;"	d
+Finish	Digit_generated.h	/^  flatbuffers::Offset<Digit> Finish() {$/;"	f	struct:o2::mch::DigitBuilder
+Finish	Digit_generated.h	/^  flatbuffers::Offset<DigitEvent> Finish() {$/;"	f	struct:o2::mch::DigitEventBuilder
+FinishDigitEventBuffer	Digit_generated.h	/^inline void FinishDigitEventBuffer($/;"	f	namespace:o2::mch
+GetDigitEvent	Digit_generated.h	/^inline const o2::mch::DigitEvent *GetDigitEvent(const void *buf) {$/;"	f	namespace:o2::mch
+VT_ADC	Digit_generated.h	/^    VT_ADC = 6$/;"	e	enum:o2::mch::FLATBUFFERS_FINAL_CLASS::__anon1
+VT_BENDINGDIGITS	Digit_generated.h	/^    VT_BENDINGDIGITS = 4,$/;"	e	enum:o2::mch::FLATBUFFERS_FINAL_CLASS::__anon2
+VT_NONBENDINGDIGITS	Digit_generated.h	/^    VT_NONBENDINGDIGITS = 6$/;"	e	enum:o2::mch::FLATBUFFERS_FINAL_CLASS::__anon2
+VT_UID	Digit_generated.h	/^    VT_UID = 4,$/;"	e	enum:o2::mch::FLATBUFFERS_FINAL_CLASS::__anon1
+Verify	Digit_generated.h	/^  bool Verify(flatbuffers::Verifier &verifier) const {$/;"	f	struct:o2::mch::FLATBUFFERS_FINAL_CLASS
+VerifyDigitEventBuffer	Digit_generated.h	/^inline bool VerifyDigitEventBuffer($/;"	f	namespace:o2::mch
+adc	Digit_generated.h	/^  int32_t adc() const {$/;"	f	struct:o2::mch::FLATBUFFERS_FINAL_CLASS
+add_adc	Digit_generated.h	/^  void add_adc(int32_t adc) {$/;"	f	struct:o2::mch::DigitBuilder
+add_bendingDigits	Digit_generated.h	/^  void add_bendingDigits(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Digit>>> bendingDigits) {$/;"	f	struct:o2::mch::DigitEventBuilder
+add_nonBendingDigits	Digit_generated.h	/^  void add_nonBendingDigits(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Digit>>> nonBendingDigits) {$/;"	f	struct:o2::mch::DigitEventBuilder
+add_uid	Digit_generated.h	/^  void add_uid(int32_t uid) {$/;"	f	struct:o2::mch::DigitBuilder
+bendingDigits	Digit_generated.h	/^  const flatbuffers::Vector<flatbuffers::Offset<Digit>> *bendingDigits() const {$/;"	f	struct:o2::mch::FLATBUFFERS_FINAL_CLASS
+convertESD	mch-esd-to-digits.cxx	/^void convertESD(const char *esdFileName, const char *baseName) {$/;"	f
+convertOneDE	mch-esd-to-digits.cxx	/^void convertOneDE(int detElemId, AliESDEvent &event,$/;"	f
+createDetElemFiles	FileCreation.cxx	/^std::map<int, std::ofstream> createDetElemFiles(const char *baseName, const std::vector<int>& detElemIds) {$/;"	f
+fbb_	Digit_generated.h	/^  flatbuffers::FlatBufferBuilder &fbb_;$/;"	m	struct:o2::mch::DigitBuilder
+fbb_	Digit_generated.h	/^  flatbuffers::FlatBufferBuilder &fbb_;$/;"	m	struct:o2::mch::DigitEventBuilder
+getClusters	mch-esd-to-digits.cxx	/^std::vector<AliESDMuonCluster *> getClusters(AliESDEvent &event) {$/;"	f
+getPadIds	mch-esd-to-digits.cxx	/^std::set<unsigned long> getPadIds(AliESDEvent &event) {$/;"	f
+getTracks	mch-esd-to-digits.cxx	/^std::vector<AliESDMuonTrack *> getTracks(AliESDEvent &event) {$/;"	f
+main	mch-digits-dump.cxx	/^int main(int argc, char **argv) { return readDigits(argv[1]); }$/;"	f
+main	mch-esd-to-digits.cxx	/^int main(int argc, char **argv) {$/;"	f
+mch	Digit_generated.h	/^namespace mch {$/;"	n	namespace:o2
+nonBendingDigits	Digit_generated.h	/^  const flatbuffers::Vector<flatbuffers::Offset<Digit>> *nonBendingDigits() const {$/;"	f	struct:o2::mch::FLATBUFFERS_FINAL_CLASS
+o2	Digit_generated.h	/^namespace o2 {$/;"	n
+readDigits	mch-digits-dump.cxx	/^int readDigits(const char *filename) {$/;"	f
+start_	Digit_generated.h	/^  flatbuffers::uoffset_t start_;$/;"	m	struct:o2::mch::DigitBuilder
+start_	Digit_generated.h	/^  flatbuffers::uoffset_t start_;$/;"	m	struct:o2::mch::DigitEventBuilder
+uid	Digit_generated.h	/^  int32_t uid() const {$/;"	f	struct:o2::mch::FLATBUFFERS_FINAL_CLASS
+uniqueBaseName	test_FileCreation.cxx	/^std::string uniqueBaseName(const char *sbase) {$/;"	f

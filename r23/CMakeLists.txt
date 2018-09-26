@@ -41,3 +41,5 @@ install(TARGETS o2muon-filter-raw RUNTIME DESTINATION bin)
 
 install(FILES ${HDRS} DESTINATION include)
 
+add_subdirectory(esdconvertor)
+

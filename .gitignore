@@ -1,2 +1,5 @@
 workspace.xml
 compile_commands.json
+*.dat
+tags
+
