@@ -9,11 +9,27 @@
 #include "TFile.h"
 #include "TTree.h"
 #include <algorithm>
+#include <array>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 #include <vector>
 
 using namespace o2::mch;
+
+using Segmentation = o2::mch::mapping::Segmentation;
+
+class SegmentationPair {
+public:
+  SegmentationPair(int detElemId)
+      : b{Segmentation{detElemId, true}}, nb{Segmentation{detElemId, false}} {}
+
+  const Segmentation &operator[](bool plane) const { return plane ? b : nb; }
+
+private:
+  Segmentation b;
+  Segmentation nb;
+};
 
 std::vector<AliESDMuonTrack *> getTracks(AliESDEvent &event) {
 
@@ -62,13 +78,15 @@ std::set<unsigned long> getPadIds(AliESDEvent &event) {
   return padIds;
 }
 
-void convertOneDE(int detElemId, AliESDEvent &event,
-                  const std::set<unsigned long> &padIds, std::ofstream &out) {
+void convertOneDE(const SegmentationPair &seg, int detElemId,
+                  AliESDEvent &event, const std::set<unsigned long> &padIds,
+                  std::ofstream &out) {
 
   std::vector<flatbuffers::Offset<o2::mch::Digit>> bendingDigits;
   std::vector<flatbuffers::Offset<o2::mch::Digit>> nonBendingDigits;
   flatbuffers::FlatBufferBuilder fbb{
       1024}; // TODO what default initial size to use ?
+
   for (auto padid : padIds) {
     int de, manuId, manuChannel, cathode;
     AliMUONVDigit::DecodeUniqueID(padid, de, manuId, manuChannel, cathode);
@@ -76,9 +94,8 @@ void convertOneDE(int detElemId, AliESDEvent &event,
       continue;
     }
     bool isBending = ((manuId & 1024) == 0);
-    o2::mch::mapping::Segmentation seg{detElemId, isBending};
-    auto uid = seg.findPadByFEE(manuId, manuChannel);
-    if (!seg.isValid(uid)) {
+    auto uid = seg[isBending].findPadByFEE(manuId, manuChannel);
+    if (!(seg[isBending].isValid(uid))) {
       std::cout << "got invalid pad !\n";
       std::cout << "[DE" << detElemId << " MANU" << manuId << " CH "
                 << manuChannel << "]\n";
@@ -92,10 +109,10 @@ void convertOneDE(int detElemId, AliESDEvent &event,
       }
     }
 
-    std::cout << "\t\t[DE" << detElemId << " MANU" << manuId << " CH "
-              << manuChannel << "]";
-    auto pad = event.FindMuonPad(padid);
-    std::cout << pad->GetADC() << "\n";
+    // std::cout << "\t\t[DE" << detElemId << " MANU" << manuId << " CH "
+    //           << manuChannel << "]";
+    // auto pad = event.FindMuonPad(padid);
+    // std::cout << pad->GetADC() << "\n";
   }
 
   if (bendingDigits.empty() && nonBendingDigits.empty()) {
@@ -107,19 +124,16 @@ void convertOneDE(int detElemId, AliESDEvent &event,
   flatbuffers::Offset<DigitPlane> nb =
       o2::mch::CreateDigitPlaneDirect(fbb, false, &nonBendingDigits);
 
-  auto vb = fbb.CreateVector(&b,1);
-  auto vnb = fbb.CreateVector(&nb,1);
+  auto vb = fbb.CreateVector(&b, 1);
+  auto vnb = fbb.CreateVector(&nb, 1);
 
   int timestamp = 0;
-  auto tb_b =
-      o2::mch::CreateDigitTimeBlock(fbb, timestamp, vb);
-  auto tb_nb =
-      o2::mch::CreateDigitTimeBlock(fbb, timestamp, vnb);
+  auto tb_b = o2::mch::CreateDigitTimeBlock(fbb, timestamp, vb);
+  auto tb_nb = o2::mch::CreateDigitTimeBlock(fbb, timestamp, vnb);
 
-  std::vector<flatbuffers::Offset<DigitTimeBlock>> vtb{tb_b,tb_nb};
+  std::vector<flatbuffers::Offset<DigitTimeBlock>> vtb{tb_b, tb_nb};
 
-   auto digitDE =
-      o2::mch::CreateDigitDE(fbb, detElemId, fbb.CreateVector(vtb));
+  auto digitDE = o2::mch::CreateDigitDE(fbb, detElemId, fbb.CreateVector(vtb));
 
   fbb.Finish(digitDE);
 
@@ -127,8 +141,8 @@ void convertOneDE(int detElemId, AliESDEvent &event,
   uint8_t *buf = fbb.GetBufferPointer();
   int size = fbb.GetSize(); // Returns the size of the buffer that
                             // `GetBufferPointer()` points to.
-  std::cout << "size=" << size << " b=" << bendingDigits.size()
-            << " nb=" << nonBendingDigits.size() << "\n";
+  // std::cout << "size=" << size << " b=" << bendingDigits.size()
+  //           << " nb=" << nonBendingDigits.size() << "\n";
   out.write(reinterpret_cast<const char *>(&size), sizeof(int));
   out.write(reinterpret_cast<const char *>(buf), sizeof(uint8_t) * size);
 }
@@ -147,16 +161,28 @@ void convertESD(const char *esdFileName, const char *baseName) {
     Error("convertESD", "no ESD tree found");
     return;
   }
-  std::cout << tree->GetEntries() << " entries to process\n";
 
   AliESDEvent event;
   event.ReadFromTree(tree);
 
-  auto nevents = 100; // tree->GetEntries();
+  auto nevents = tree->GetEntries();
 
-  std::vector<int> detElemIds = {100};
+  std::cout << nevents << " entries to process\n";
+
+  tree->SetBranchStatus("*", false);
+  tree->SetBranchStatus("AliESDRun*", true);
+  tree->SetBranchStatus("AliESDHeader*", true);
+  tree->SetBranchStatus("Muon*", true);
+
+  std::vector<int> detElemIds = {100, 101, 102, 103, 200, 201, 202, 203};
 
   auto out = createDetElemFiles(baseName, detElemIds);
+
+  std::map<int, std::unique_ptr<SegmentationPair>> segmentations;
+
+  for (auto detElemId: detElemIds) {
+    segmentations.insert(std::make_pair(detElemId,std::make_unique<SegmentationPair>(detElemId)));
+  }
 
   for (auto iEvent = 0; iEvent < nevents; iEvent++) {
 
@@ -171,7 +197,8 @@ void convertESD(const char *esdFileName, const char *baseName) {
     }
 
     for (auto detElemId : detElemIds) {
-      convertOneDE(detElemId, event, padIds, out[detElemId]);
+      convertOneDE(*(segmentations[detElemId]), detElemId, event, padIds,
+                   out[detElemId]);
     }
   }
 }
