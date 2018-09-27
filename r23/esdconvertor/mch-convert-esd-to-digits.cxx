@@ -5,9 +5,10 @@
 #include "AliMUONVDigit.h"
 #include "Digit_generated.h"
 #include "FileCreation.h"
-#include "MCHMappingInterface/Segmentation.h"
+#include "SegmentationPair.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "boost/program_options.hpp"
 #include <algorithm>
 #include <array>
 #include <fstream>
@@ -15,30 +16,18 @@
 #include <memory>
 #include <vector>
 
+namespace po = boost::program_options;
 using namespace o2::mch;
 
-using Segmentation = o2::mch::mapping::Segmentation;
+std::vector<AliESDMuonTrack*> getTracks(AliESDEvent& event)
+{
 
-class SegmentationPair {
-public:
-  SegmentationPair(int detElemId)
-      : b{Segmentation{detElemId, true}}, nb{Segmentation{detElemId, false}} {}
-
-  const Segmentation &operator[](bool plane) const { return plane ? b : nb; }
-
-private:
-  Segmentation b;
-  Segmentation nb;
-};
-
-std::vector<AliESDMuonTrack *> getTracks(AliESDEvent &event) {
-
-  std::vector<AliESDMuonTrack *> tracks;
+  std::vector<AliESDMuonTrack*> tracks;
 
   auto nTracks = event.GetNumberOfMuonTracks();
 
   for (auto iTrack = 0; iTrack < nTracks; iTrack++) {
-    AliESDMuonTrack *track = event.GetMuonTrack(iTrack);
+    AliESDMuonTrack* track = event.GetMuonTrack(iTrack);
     if (track->ContainTrackerData()) {
       tracks.push_back(track);
     }
@@ -46,9 +35,10 @@ std::vector<AliESDMuonTrack *> getTracks(AliESDEvent &event) {
   return tracks;
 }
 
-std::vector<AliESDMuonCluster *> getClusters(AliESDEvent &event) {
+std::vector<AliESDMuonCluster*> getClusters(AliESDEvent& event)
+{
 
-  std::vector<AliESDMuonCluster *> clusters;
+  std::vector<AliESDMuonCluster*> clusters;
 
   auto tracks = getTracks(event);
 
@@ -63,7 +53,8 @@ std::vector<AliESDMuonCluster *> getClusters(AliESDEvent &event) {
   return clusters;
 }
 
-std::set<unsigned long> getPadIds(AliESDEvent &event) {
+std::set<unsigned long> getPadIds(AliESDEvent& event)
+{
 
   std::set<unsigned long> padIds;
 
@@ -78,14 +69,16 @@ std::set<unsigned long> getPadIds(AliESDEvent &event) {
   return padIds;
 }
 
-void convertOneDE(const SegmentationPair &seg, int detElemId,
-                  AliESDEvent &event, const std::set<unsigned long> &padIds,
-                  std::ofstream &out) {
+void convertOneDE(const SegmentationPair& seg, int detElemId,
+                  AliESDEvent& event, const std::set<unsigned long>& padIds,
+                  std::ofstream& out)
+{
 
   std::vector<flatbuffers::Offset<o2::mch::Digit>> bendingDigits;
   std::vector<flatbuffers::Offset<o2::mch::Digit>> nonBendingDigits;
   flatbuffers::FlatBufferBuilder fbb{
-      1024}; // TODO what default initial size to use ?
+    1024
+  }; // TODO what default initial size to use ?
 
   for (auto padid : padIds) {
     int de, manuId, manuChannel, cathode;
@@ -120,9 +113,9 @@ void convertOneDE(const SegmentationPair &seg, int detElemId,
   }
 
   flatbuffers::Offset<DigitPlane> b =
-      o2::mch::CreateDigitPlaneDirect(fbb, true, &bendingDigits);
+    o2::mch::CreateDigitPlaneDirect(fbb, true, &bendingDigits);
   flatbuffers::Offset<DigitPlane> nb =
-      o2::mch::CreateDigitPlaneDirect(fbb, false, &nonBendingDigits);
+    o2::mch::CreateDigitPlaneDirect(fbb, false, &nonBendingDigits);
 
   auto vb = fbb.CreateVector(&b, 1);
   auto vnb = fbb.CreateVector(&nb, 1);
@@ -131,32 +124,33 @@ void convertOneDE(const SegmentationPair &seg, int detElemId,
   auto tb_b = o2::mch::CreateDigitTimeBlock(fbb, timestamp, vb);
   auto tb_nb = o2::mch::CreateDigitTimeBlock(fbb, timestamp, vnb);
 
-  std::vector<flatbuffers::Offset<DigitTimeBlock>> vtb{tb_b, tb_nb};
+  std::vector<flatbuffers::Offset<DigitTimeBlock>> vtb{ tb_b, tb_nb };
 
   auto digitDE = o2::mch::CreateDigitDE(fbb, detElemId, fbb.CreateVector(vtb));
 
   fbb.Finish(digitDE);
 
   // This must be called after `Finish()`.
-  uint8_t *buf = fbb.GetBufferPointer();
+  uint8_t* buf = fbb.GetBufferPointer();
   int size = fbb.GetSize(); // Returns the size of the buffer that
                             // `GetBufferPointer()` points to.
   // std::cout << "size=" << size << " b=" << bendingDigits.size()
   //           << " nb=" << nonBendingDigits.size() << "\n";
-  out.write(reinterpret_cast<const char *>(&size), sizeof(int));
-  out.write(reinterpret_cast<const char *>(buf), sizeof(uint8_t) * size);
+  out.write(reinterpret_cast<const char*>(&size), sizeof(int));
+  out.write(reinterpret_cast<const char*>(buf), sizeof(uint8_t) * size);
 }
 
-void convertESD(const char *esdFileName, const char *baseName) {
+void convertESD(const std::vector<int>& detElemIds, const char* esdFileName, std::map<int,std::ofstream>& out)
+{
   // open the ESD file
-  std::unique_ptr<TFile> esdFile{TFile::Open(esdFileName)};
+  std::unique_ptr<TFile> esdFile{ TFile::Open(esdFileName) };
 
   if (!esdFile || !esdFile->IsOpen()) {
     Error("convertESD", "opening ESD file %s failed", esdFileName);
     return;
   }
 
-  TTree *tree = static_cast<TTree *>(esdFile->Get("esdTree"));
+  TTree* tree = static_cast<TTree*>(esdFile->Get("esdTree"));
   if (!tree) {
     Error("convertESD", "no ESD tree found");
     return;
@@ -174,14 +168,11 @@ void convertESD(const char *esdFileName, const char *baseName) {
   tree->SetBranchStatus("AliESDHeader*", true);
   tree->SetBranchStatus("Muon*", true);
 
-  std::vector<int> detElemIds = {100, 101, 102, 103, 200, 201, 202, 203};
-
-  auto out = createDetElemFiles(baseName, detElemIds);
-
   std::map<int, std::unique_ptr<SegmentationPair>> segmentations;
 
-  for (auto detElemId: detElemIds) {
-    segmentations.insert(std::make_pair(detElemId,std::make_unique<SegmentationPair>(detElemId)));
+  for (auto detElemId : detElemIds) {
+    segmentations.insert(std::make_pair(
+      detElemId, std::make_unique<SegmentationPair>(detElemId)));
   }
 
   for (auto iEvent = 0; iEvent < nevents; iEvent++) {
@@ -197,15 +188,64 @@ void convertESD(const char *esdFileName, const char *baseName) {
     }
 
     for (auto detElemId : detElemIds) {
-      convertOneDE(*(segmentations[detElemId]), detElemId, event, padIds,
-                   out[detElemId]);
+      auto file = out.find(detElemId);
+      convertOneDE(*(segmentations[detElemId]), detElemId, event, padIds,file->second);
     }
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
+  po::variables_map vm;
+  po::options_description generic("Generic options");
+  std::string basename;
+  std::vector<int> detElemIds;
 
-  convertESD(argv[1], argv[2]);
+  // clang-format off
+  generic.add_options()
+          ("help", "produce help message")
+          ("detelemids", po::value<std::vector<int>>(&detElemIds), "produce digit for those detetcion elements (all if not specified)")
+          ("basename", po::value<std::string>(&basename),"basename of output files");
+
+  po::options_description hidden("hidden options");
+  hidden.add_options()
+          ("input-file", po::value<std::vector<std::string>>(),"input file");
+  // clang-format on
+
+  po::options_description cmdline;
+  cmdline.add(generic).add(hidden);
+
+  po::positional_options_description p;
+  p.add("input-file", -1);
+
+  po::store(
+    po::command_line_parser(argc, argv).options(cmdline).positional(p).run(),
+    vm);
+  po::notify(vm);
+
+  if (vm.count("help")) {
+    std::cout << generic << std::endl;
+    return 2;
+  }
+  if (vm.count("input-file") == 0) {
+    std::cout << "no input file specified" << std::endl;
+    return 1;
+  }
+
+  std::vector<std::string> inputfiles{
+    vm["input-file"].as<std::vector<std::string>>()
+  };
+
+  if (detElemIds.empty()) {
+    std::cout << "no detection element specified : using all of them\n";
+    o2::mch::mapping::forEachDetectionElement([&detElemIds](int detElemId) { detElemIds.push_back(detElemId); });
+  }
+
+  auto out = createDetElemFiles(basename.c_str(), detElemIds);
+
+  for (auto input : inputfiles) {
+    convertESD(detElemIds, input.c_str(), out);
+  }
   return 0;
 }
 
