@@ -5,11 +5,21 @@ table Digit {
   adc:int;
 }
 
-table DigitEvent {
-  bendingDigits:[Digit];
-  nonBendingDigits:[Digit];
+table DigitPlane {
+  isBending: bool;
+  digits:[Digit];
 }
 
-root_type DigitEvent;
+table DigitTimeBlock {
+  timestamp: int;
+  digitPlanes:[DigitPlane];
+}
+
+table DigitDE {
+  detElemId: int;
+  digitTimeBlocks:[DigitTimeBlock];
+}
+
+root_type DigitDE;
 
 

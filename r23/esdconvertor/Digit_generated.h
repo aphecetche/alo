@@ -11,7 +11,11 @@ namespace mch {
 
 struct Digit;
 
-struct DigitEvent;
+struct DigitPlane;
+
+struct DigitTimeBlock;
+
+struct DigitDE;
 
 struct Digit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
@@ -63,82 +67,204 @@ inline flatbuffers::Offset<Digit> CreateDigit(
   return builder_.Finish();
 }
 
-struct DigitEvent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+struct DigitPlane FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
-    VT_BENDINGDIGITS = 4,
-    VT_NONBENDINGDIGITS = 6
+    VT_ISBENDING = 4,
+    VT_DIGITS = 6
   };
-  const flatbuffers::Vector<flatbuffers::Offset<Digit>> *bendingDigits() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Digit>> *>(VT_BENDINGDIGITS);
+  bool isBending() const {
+    return GetField<uint8_t>(VT_ISBENDING, 0) != 0;
   }
-  const flatbuffers::Vector<flatbuffers::Offset<Digit>> *nonBendingDigits() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Digit>> *>(VT_NONBENDINGDIGITS);
+  const flatbuffers::Vector<flatbuffers::Offset<Digit>> *digits() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Digit>> *>(VT_DIGITS);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_BENDINGDIGITS) &&
-           verifier.Verify(bendingDigits()) &&
-           verifier.VerifyVectorOfTables(bendingDigits()) &&
-           VerifyOffset(verifier, VT_NONBENDINGDIGITS) &&
-           verifier.Verify(nonBendingDigits()) &&
-           verifier.VerifyVectorOfTables(nonBendingDigits()) &&
+           VerifyField<uint8_t>(verifier, VT_ISBENDING) &&
+           VerifyOffset(verifier, VT_DIGITS) &&
+           verifier.Verify(digits()) &&
+           verifier.VerifyVectorOfTables(digits()) &&
            verifier.EndTable();
   }
 };
 
-struct DigitEventBuilder {
+struct DigitPlaneBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_bendingDigits(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Digit>>> bendingDigits) {
-    fbb_.AddOffset(DigitEvent::VT_BENDINGDIGITS, bendingDigits);
+  void add_isBending(bool isBending) {
+    fbb_.AddElement<uint8_t>(DigitPlane::VT_ISBENDING, static_cast<uint8_t>(isBending), 0);
   }
-  void add_nonBendingDigits(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Digit>>> nonBendingDigits) {
-    fbb_.AddOffset(DigitEvent::VT_NONBENDINGDIGITS, nonBendingDigits);
+  void add_digits(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Digit>>> digits) {
+    fbb_.AddOffset(DigitPlane::VT_DIGITS, digits);
   }
-  explicit DigitEventBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit DigitPlaneBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  DigitEventBuilder &operator=(const DigitEventBuilder &);
-  flatbuffers::Offset<DigitEvent> Finish() {
+  DigitPlaneBuilder &operator=(const DigitPlaneBuilder &);
+  flatbuffers::Offset<DigitPlane> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<DigitEvent>(end);
+    auto o = flatbuffers::Offset<DigitPlane>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<DigitEvent> CreateDigitEvent(
+inline flatbuffers::Offset<DigitPlane> CreateDigitPlane(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Digit>>> bendingDigits = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Digit>>> nonBendingDigits = 0) {
-  DigitEventBuilder builder_(_fbb);
-  builder_.add_nonBendingDigits(nonBendingDigits);
-  builder_.add_bendingDigits(bendingDigits);
+    bool isBending = false,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Digit>>> digits = 0) {
+  DigitPlaneBuilder builder_(_fbb);
+  builder_.add_digits(digits);
+  builder_.add_isBending(isBending);
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<DigitEvent> CreateDigitEventDirect(
+inline flatbuffers::Offset<DigitPlane> CreateDigitPlaneDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<flatbuffers::Offset<Digit>> *bendingDigits = nullptr,
-    const std::vector<flatbuffers::Offset<Digit>> *nonBendingDigits = nullptr) {
-  return o2::mch::CreateDigitEvent(
+    bool isBending = false,
+    const std::vector<flatbuffers::Offset<Digit>> *digits = nullptr) {
+  return o2::mch::CreateDigitPlane(
       _fbb,
-      bendingDigits ? _fbb.CreateVector<flatbuffers::Offset<Digit>>(*bendingDigits) : 0,
-      nonBendingDigits ? _fbb.CreateVector<flatbuffers::Offset<Digit>>(*nonBendingDigits) : 0);
+      isBending,
+      digits ? _fbb.CreateVector<flatbuffers::Offset<Digit>>(*digits) : 0);
 }
 
-inline const o2::mch::DigitEvent *GetDigitEvent(const void *buf) {
-  return flatbuffers::GetRoot<o2::mch::DigitEvent>(buf);
+struct DigitTimeBlock FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  enum {
+    VT_TIMESTAMP = 4,
+    VT_DIGITPLANES = 6
+  };
+  int32_t timestamp() const {
+    return GetField<int32_t>(VT_TIMESTAMP, 0);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<DigitPlane>> *digitPlanes() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<DigitPlane>> *>(VT_DIGITPLANES);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_TIMESTAMP) &&
+           VerifyOffset(verifier, VT_DIGITPLANES) &&
+           verifier.Verify(digitPlanes()) &&
+           verifier.VerifyVectorOfTables(digitPlanes()) &&
+           verifier.EndTable();
+  }
+};
+
+struct DigitTimeBlockBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_timestamp(int32_t timestamp) {
+    fbb_.AddElement<int32_t>(DigitTimeBlock::VT_TIMESTAMP, timestamp, 0);
+  }
+  void add_digitPlanes(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<DigitPlane>>> digitPlanes) {
+    fbb_.AddOffset(DigitTimeBlock::VT_DIGITPLANES, digitPlanes);
+  }
+  explicit DigitTimeBlockBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  DigitTimeBlockBuilder &operator=(const DigitTimeBlockBuilder &);
+  flatbuffers::Offset<DigitTimeBlock> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<DigitTimeBlock>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<DigitTimeBlock> CreateDigitTimeBlock(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t timestamp = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<DigitPlane>>> digitPlanes = 0) {
+  DigitTimeBlockBuilder builder_(_fbb);
+  builder_.add_digitPlanes(digitPlanes);
+  builder_.add_timestamp(timestamp);
+  return builder_.Finish();
 }
 
-inline bool VerifyDigitEventBuffer(
+inline flatbuffers::Offset<DigitTimeBlock> CreateDigitTimeBlockDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t timestamp = 0,
+    const std::vector<flatbuffers::Offset<DigitPlane>> *digitPlanes = nullptr) {
+  return o2::mch::CreateDigitTimeBlock(
+      _fbb,
+      timestamp,
+      digitPlanes ? _fbb.CreateVector<flatbuffers::Offset<DigitPlane>>(*digitPlanes) : 0);
+}
+
+struct DigitDE FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  enum {
+    VT_DETELEMID = 4,
+    VT_DIGITTIMEBLOCKS = 6
+  };
+  int32_t detElemId() const {
+    return GetField<int32_t>(VT_DETELEMID, 0);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<DigitTimeBlock>> *digitTimeBlocks() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<DigitTimeBlock>> *>(VT_DIGITTIMEBLOCKS);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_DETELEMID) &&
+           VerifyOffset(verifier, VT_DIGITTIMEBLOCKS) &&
+           verifier.Verify(digitTimeBlocks()) &&
+           verifier.VerifyVectorOfTables(digitTimeBlocks()) &&
+           verifier.EndTable();
+  }
+};
+
+struct DigitDEBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_detElemId(int32_t detElemId) {
+    fbb_.AddElement<int32_t>(DigitDE::VT_DETELEMID, detElemId, 0);
+  }
+  void add_digitTimeBlocks(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<DigitTimeBlock>>> digitTimeBlocks) {
+    fbb_.AddOffset(DigitDE::VT_DIGITTIMEBLOCKS, digitTimeBlocks);
+  }
+  explicit DigitDEBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  DigitDEBuilder &operator=(const DigitDEBuilder &);
+  flatbuffers::Offset<DigitDE> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<DigitDE>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<DigitDE> CreateDigitDE(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t detElemId = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<DigitTimeBlock>>> digitTimeBlocks = 0) {
+  DigitDEBuilder builder_(_fbb);
+  builder_.add_digitTimeBlocks(digitTimeBlocks);
+  builder_.add_detElemId(detElemId);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<DigitDE> CreateDigitDEDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t detElemId = 0,
+    const std::vector<flatbuffers::Offset<DigitTimeBlock>> *digitTimeBlocks = nullptr) {
+  return o2::mch::CreateDigitDE(
+      _fbb,
+      detElemId,
+      digitTimeBlocks ? _fbb.CreateVector<flatbuffers::Offset<DigitTimeBlock>>(*digitTimeBlocks) : 0);
+}
+
+inline const o2::mch::DigitDE *GetDigitDE(const void *buf) {
+  return flatbuffers::GetRoot<o2::mch::DigitDE>(buf);
+}
+
+inline bool VerifyDigitDEBuffer(
     flatbuffers::Verifier &verifier) {
-  return verifier.VerifyBuffer<o2::mch::DigitEvent>(nullptr);
+  return verifier.VerifyBuffer<o2::mch::DigitDE>(nullptr);
 }
 
-inline void FinishDigitEventBuffer(
+inline void FinishDigitDEBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
-    flatbuffers::Offset<o2::mch::DigitEvent> root) {
+    flatbuffers::Offset<o2::mch::DigitDE> root) {
   fbb.Finish(root);
 }
 

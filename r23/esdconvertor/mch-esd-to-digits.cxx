@@ -13,6 +13,8 @@
 #include <iomanip>
 #include <vector>
 
+using namespace o2::mch;
+
 std::vector<AliESDMuonTrack *> getTracks(AliESDEvent &event) {
 
   std::vector<AliESDMuonTrack *> tracks;
@@ -83,7 +85,7 @@ void convertOneDE(int detElemId, AliESDEvent &event,
     } else {
       auto pad = event.FindMuonPad(padid);
       auto adc = pad->GetADC();
-      if (!isBending) {
+      if (isBending) {
         bendingDigits.push_back(o2::mch::CreateDigit(fbb, uid, adc));
       } else {
         nonBendingDigits.push_back(o2::mch::CreateDigit(fbb, uid, adc));
@@ -100,10 +102,26 @@ void convertOneDE(int detElemId, AliESDEvent &event,
     return;
   }
 
-  auto digitEvent =
-      o2::mch::CreateDigitEventDirect(fbb, &bendingDigits, &nonBendingDigits);
+  flatbuffers::Offset<DigitPlane> b =
+      o2::mch::CreateDigitPlaneDirect(fbb, true, &bendingDigits);
+  flatbuffers::Offset<DigitPlane> nb =
+      o2::mch::CreateDigitPlaneDirect(fbb, false, &nonBendingDigits);
 
-  fbb.Finish(digitEvent);
+  auto vb = fbb.CreateVector(&b,1);
+  auto vnb = fbb.CreateVector(&nb,1);
+
+  int timestamp = 0;
+  auto tb_b =
+      o2::mch::CreateDigitTimeBlock(fbb, timestamp, vb);
+  auto tb_nb =
+      o2::mch::CreateDigitTimeBlock(fbb, timestamp, vnb);
+
+  std::vector<flatbuffers::Offset<DigitTimeBlock>> vtb{tb_b,tb_nb};
+
+   auto digitDE =
+      o2::mch::CreateDigitDE(fbb, detElemId, fbb.CreateVector(vtb));
+
+  fbb.Finish(digitDE);
 
   // This must be called after `Finish()`.
   uint8_t *buf = fbb.GetBufferPointer();
@@ -151,8 +169,6 @@ void convertESD(const char *esdFileName, const char *baseName) {
     if (!padIds.size()) {
       continue;
     }
-
-    std::cout << "Event " << iEvent << " npads=" << padIds.size() << "\n";
 
     for (auto detElemId : detElemIds) {
       convertOneDE(detElemId, event, padIds, out[detElemId]);

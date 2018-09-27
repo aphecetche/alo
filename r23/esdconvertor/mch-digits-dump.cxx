@@ -12,11 +12,24 @@ int readDigits(const char *filename) {
     in.read(reinterpret_cast<char *>(&size), sizeof(int));
     std::cout << "size=" << size << "\n";
     char *buf = new char[size];
+    if (in.eof()) {
+      continue;
+    }
+
     in.read(buf, size);
-    auto digitEvent = o2::mch::GetDigitEvent(buf);
-    auto bendingDigits = digitEvent->bendingDigits();
-    for (auto d : *bendingDigits) {
-        std::cout << "\t\t" << d->uid() << " " << d->adc() << "\n";
+    auto digitDE = o2::mch::GetDigitDE(buf);
+    int detElemId = digitDE->detElemId();
+    std::cout << "DE " << detElemId << "\n";
+    auto digitTB = digitDE->digitTimeBlocks()->Get(0);
+    auto digitPlane = digitTB->digitPlanes()->Get(0);
+    bool isBending = digitPlane->isBending();
+    std::cout << ( isBending ? "B":"NB") << "\n";
+    auto digits = digitPlane->digits();
+    o2::mch::mapping::Segmentation seg{detElemId,isBending};
+    for (auto d : *digits) {
+        int dsId = seg.padDualSampaId(d->uid());
+        int dsCh = seg.padDualSampaChannel(d->uid());
+        std::cout << "\t\t" << d->uid() << " [" << dsId << "," << dsCh << "]" << d->adc() << "\n";
     }
     delete[] buf;
   }
