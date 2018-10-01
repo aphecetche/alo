@@ -53,16 +53,16 @@ std::vector<AliESDMuonCluster*> getClusters(AliESDEvent& event)
   return clusters;
 }
 
-std::set<unsigned long> getPadIds(AliESDEvent& event)
+std::vector<unsigned long> getPadIds(AliESDEvent& event)
 {
 
-  std::set<unsigned long> padIds;
+  std::vector<unsigned long> padIds;
 
   auto clusters = getClusters(event);
 
   for (auto c : clusters) {
     for (int i = 0; i < c->GetNPads(); ++i) {
-      padIds.insert(c->GetPadId(i));
+      padIds.emplace_back(c->GetPadId(i));
     }
   }
 
@@ -70,7 +70,7 @@ std::set<unsigned long> getPadIds(AliESDEvent& event)
 }
 
 void convertOneDE(const SegmentationPair& seg, int detElemId,
-                  AliESDEvent& event, const std::set<unsigned long>& padIds,
+                  AliESDEvent& event, const std::vector<unsigned long>& padIds,
                   std::ofstream& out)
 {
 

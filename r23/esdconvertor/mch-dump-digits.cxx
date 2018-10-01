@@ -20,18 +20,18 @@ const SegmentationPair& getSegmentationPair(int detElemId)
 void dumpDigitPlane(const o2::mch::DigitPlane* digitPlane, const SegmentationPair& segpair)
 {
   bool isBending = digitPlane->isBending();
-  std::cout << (isBending ? "B" : "NB") << "\n";
+//   std::cout << (isBending ? "B" : "NB") << "\n";
   auto digits = digitPlane->digits();
   auto& seg = segpair[isBending];
   std::set<int> uniq;
   for (auto d : *digits) {
     int dsId = seg.padDualSampaId(d->uid());
     int dsCh = seg.padDualSampaChannel(d->uid());
-    std::cout << "\t\t" << d->uid() << " [" << dsId << "," << dsCh << "]" << d->adc() << "\n";
+//     std::cout << "\t\t" << d->uid() << " [" << dsId << "," << dsCh << "]" << d->adc() << "\n";
     uniq.insert(d->uid());
   }
   if (uniq.size() != digits->Length()) {
-    std::cout << "Got duplicates\n";
+    std::cout << "Got duplicates " << uniq.size() << " " << digits->Length() << "\n";
   }
 }
 
@@ -43,7 +43,7 @@ int readDigits(const char* filename)
 
   while (!in.eof()) {
     in.read(reinterpret_cast<char*>(&size), sizeof(int));
-    std::cout << "size=" << size << "\n";
+     std::cout << "size=" << size << "\n";
     char* buf = new char[size];
     if (in.eof()) {
       continue;
@@ -57,7 +57,7 @@ int readDigits(const char* filename)
 
     int nblocks = digitDE->digitTimeBlocks()->Length();
 
-    std::cout << "DE " << detElemId << " " << nblocks << " blocks\n";
+     std::cout << "DE " << detElemId << " " << nblocks << " blocks\n";
 
     for (auto i = 0; i < nblocks; i++) {
       auto digitTB = digitDE->digitTimeBlocks()->Get(i);
