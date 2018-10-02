@@ -82,7 +82,7 @@ struct DigitPlane FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_ISBENDING) &&
            VerifyOffset(verifier, VT_DIGITS) &&
-           verifier.Verify(digits()) &&
+           verifier.VerifyVector(digits()) &&
            verifier.VerifyVectorOfTables(digits()) &&
            verifier.EndTable();
   }
@@ -144,7 +144,7 @@ struct DigitTimeBlock FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_TIMESTAMP) &&
            VerifyOffset(verifier, VT_DIGITPLANES) &&
-           verifier.Verify(digitPlanes()) &&
+           verifier.VerifyVector(digitPlanes()) &&
            verifier.VerifyVectorOfTables(digitPlanes()) &&
            verifier.EndTable();
   }
@@ -206,7 +206,7 @@ struct DigitDE FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_DETELEMID) &&
            VerifyOffset(verifier, VT_DIGITTIMEBLOCKS) &&
-           verifier.Verify(digitTimeBlocks()) &&
+           verifier.VerifyVector(digitTimeBlocks()) &&
            verifier.VerifyVectorOfTables(digitTimeBlocks()) &&
            verifier.EndTable();
   }
@@ -257,15 +257,30 @@ inline const o2::mch::DigitDE *GetDigitDE(const void *buf) {
   return flatbuffers::GetRoot<o2::mch::DigitDE>(buf);
 }
 
+inline const o2::mch::DigitDE *GetSizePrefixedDigitDE(const void *buf) {
+  return flatbuffers::GetSizePrefixedRoot<o2::mch::DigitDE>(buf);
+}
+
 inline bool VerifyDigitDEBuffer(
     flatbuffers::Verifier &verifier) {
   return verifier.VerifyBuffer<o2::mch::DigitDE>(nullptr);
+}
+
+inline bool VerifySizePrefixedDigitDEBuffer(
+    flatbuffers::Verifier &verifier) {
+  return verifier.VerifySizePrefixedBuffer<o2::mch::DigitDE>(nullptr);
 }
 
 inline void FinishDigitDEBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
     flatbuffers::Offset<o2::mch::DigitDE> root) {
   fbb.Finish(root);
+}
+
+inline void FinishSizePrefixedDigitDEBuffer(
+    flatbuffers::FlatBufferBuilder &fbb,
+    flatbuffers::Offset<o2::mch::DigitDE> root) {
+  fbb.FinishSizePrefixed(root);
 }
 
 }  // namespace mch

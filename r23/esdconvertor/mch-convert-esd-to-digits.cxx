@@ -2,7 +2,6 @@
 #include "AliESDMuonCluster.h"
 #include "AliESDMuonPad.h"
 #include "AliESDMuonTrack.h"
-#include "AliMUONVDigit.h"
 #include "Digit_generated.h"
 #include "FileCreation.h"
 #include "SegmentationPair.h"
@@ -81,8 +80,9 @@ void convertOneDE(const SegmentationPair& seg, int detElemId,
   }; // TODO what default initial size to use ?
 
   for (auto padid : padIds) {
-    int de, manuId, manuChannel, cathode;
-    AliMUONVDigit::DecodeUniqueID(padid, de, manuId, manuChannel, cathode);
+    int de = padid & 0xFFF;
+    int manuId = (padid & 0xFFF000) >> 12;
+    int manuChannel = (padid & 0x3F000000) >> 24;
     if (de != detElemId) {
       continue;
     }
