@@ -244,6 +244,7 @@ int main(int argc, char** argv)
   auto out = createDetElemFiles(basename.c_str(), detElemIds);
 
   for (auto input : inputfiles) {
+      std::cout << "Converting file " << input << "\n";
     convertESD(detElemIds, input.c_str(), out);
   }
   return 0;
