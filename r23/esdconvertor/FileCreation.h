@@ -4,7 +4,8 @@
 #include <map>
 #include <fstream>
 #include <vector>
+#include <string>
 
-std::map<int, std::ofstream> createDetElemFiles(const char *baseName, const std::vector<int>& detElemIds);
+std::map<int, std::ofstream> createDetElemFiles(const std::string& baseName, const std::vector<int>& detElemIds);
 
 #endif

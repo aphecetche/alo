@@ -23,12 +23,13 @@ set(CMAKE_MODULE_PATH "${alo_SOURCE_DIR}/cmake")
 find_package(ROOT)
 find_package(AliRoot)
 find_package(O2 REQUIRED)
+find_package(FlatBuffers)
 
 include(CMakeALICE)
 
 set(CMAKE_CXX_STANDARD 14)
 
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+find_package(Boost COMPONENTS unit_test_framework program_options filesystem REQUIRED)
 include(CTest)
 
 find_package(RapidJSON)
