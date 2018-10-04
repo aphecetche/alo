@@ -16,4 +16,6 @@ class SegmentationPair
   o2::mch::mapping::Segmentation nb;
 };
 
+const SegmentationPair& getSegmentationPair(int detElemId);
+
 #endif

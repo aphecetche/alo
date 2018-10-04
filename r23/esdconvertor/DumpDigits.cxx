@@ -4,19 +4,6 @@
 #include <iostream>
 #include <map>
 
-const SegmentationPair& getSegmentationPair(int detElemId)
-{
-  static std::map<int, std::unique_ptr<SegmentationPair>> segpairs;
-
-  auto it = segpairs.find(detElemId);
-  if (it != segpairs.end()) {
-    return *(it->second);
-  } else {
-    segpairs.insert(std::make_pair(detElemId, std::make_unique<SegmentationPair>(detElemId)));
-    return getSegmentationPair(detElemId);
-  }
-}
-
 void dumpDigitPlane(const o2::mch::DigitPlane* digitPlane, const SegmentationPair& segpair, unsigned long& npadids, unsigned long& nduppadids)
 {
   bool isBending = digitPlane->isBending();
@@ -38,7 +25,7 @@ void dumpDigitPlane(const o2::mch::DigitPlane* digitPlane, const SegmentationPai
   }
 }
 
-int readDigits(const char* filename)
+void dumpDigits(const std::string& filename)
 {
   std::ifstream in(filename);
 
@@ -83,4 +70,3 @@ int readDigits(const char* filename)
 
 }
 
-int main(int argc, char** argv) { return readDigits(argv[1]); }

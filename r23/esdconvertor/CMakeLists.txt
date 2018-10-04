@@ -1,26 +1,20 @@
-# cmake_minimum_required(VERSION 3.6)
-# cmake_policy(SET CMP0003 NEW)
-# cmake_policy(SET CMP0028 NEW)
-#
-# find_package(AliRoot REQUIRED)
-# find_package(O2 REQUIRED)
-# find_package(FlatBuffers REQUIRED)
-# find_package(ROOT REQUIRED)
-# find_package(Boost 1.59 COMPONENTS unit_test_framework filesystem program_options REQUIRED)
-#
+# FIXME: should call flatc to re-generate the header files
+# from the .fbs files instead of using the ones commited ?
+
 add_executable(mch-convert-esd 
         mch-convert-esd.cxx 
         FileCreation.cxx
         ConvertESD.cxx
         GetESDClusters.cxx
+        SegmentationPair.cxx
         )
 
 target_link_libraries(mch-convert-esd PRIVATE flatbuffers::flatbuffers ROOT::RIO AliRoot::ESD o2::MCHMappingSegContour3 o2::MCHMappingImpl3 Boost::program_options)
 install(TARGETS mch-convert-esd RUNTIME DESTINATION bin)
 
-add_executable(mch-dump-digits mch-dump-digits.cxx)
-target_link_libraries(mch-dump-digits PRIVATE flatbuffers::flatbuffers o2::MCHMappingImpl3)
-install(TARGETS mch-dump-digits RUNTIME DESTINATION bin)
+add_executable(mch-dump mch-dump.cxx SegmentationPair.cxx DumpDigits.cxx)
+target_link_libraries(mch-dump PRIVATE flatbuffers::flatbuffers o2::MCHMappingImpl3 Boost::program_options)
+install(TARGETS mch-dump RUNTIME DESTINATION bin)
 
 add_executable(test_FileCreation test_FileCreation.cxx FileCreation.cxx)
 target_link_libraries(test_FileCreation PRIVATE o2::MCHMappingImpl3 Boost::unit_test_framework Boost::filesystem)

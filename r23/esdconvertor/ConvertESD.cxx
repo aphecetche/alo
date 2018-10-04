@@ -4,6 +4,7 @@
 #include "AliESDMuonCluster.h"
 #include "AliESDMuonPad.h"
 #include "AliESDMuonTrack.h"
+#include "Cluster_generated.h"
 #include "Digit_generated.h"
 #include "GetESDClusters.h"
 #include "SegmentationPair.h"
@@ -11,12 +12,30 @@
 #include "TTree.h"
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <fstream>
 #include <iomanip>
 #include <memory>
 #include <vector>
 
 using namespace o2::mch;
+
+bool isBendingManu(int manuId)
+{
+  return (manuId & 1024) == 0;
+}
+int getDetElemId(unsigned int esdDigitUID)
+{
+  return esdDigitUID & 0xFFF;
+}
+int getManuId(unsigned int esdDigitUID)
+{
+  return (esdDigitUID & 0xFFF000) >> 12;
+}
+int getManuChannel(unsigned int esdDigitUID)
+{
+  return (esdDigitUID & 0x3F000000) >> 24;
+}
 
 SegmentationMap getSegmentations(const std::vector<int>& detElemIds)
 {
@@ -81,12 +100,13 @@ void convertESD(const SegmentationMap& segmentations,
     for (auto& seg : segmentations) {
       auto detElemId = seg.first;
       auto clusterFile = clusterFiles.find(detElemId);
+      assert(clusterFile->second.is_open());
       auto clusters = getClusters(event, detElemId);
       fbb.Clear();
       convertClusters(*(seg.second), clusters, fbb);
       writeBuffer(fbb, clusterFile->second);
       auto digitFile = digitFiles.find(detElemId);
-      if (digitFile->second.is_open() > 0) {
+      if (digitFile != digitFiles.end()) {
         fbb.Clear();
         convertDigits(*(seg.second), event, clusters, fbb);
         writeBuffer(fbb, digitFile->second);
@@ -95,22 +115,65 @@ void convertESD(const SegmentationMap& segmentations,
   }
 }
 
-std::vector<unsigned long> getPadIds(std::vector<AliESDMuonCluster*>& clusters)
+std::vector<unsigned long> getDigitUIDs(std::vector<AliESDMuonCluster*>& clusters)
 {
-  std::vector<unsigned long> padIds;
+  std::vector<unsigned long> esdDigitUIDs;
 
   for (auto c : clusters) {
     for (int i = 0; i < c->GetNPads(); ++i) {
-      padIds.emplace_back(c->GetPadId(i));
+      esdDigitUIDs.emplace_back(c->GetPadId(i));
     }
   }
 
-  return padIds;
+  return esdDigitUIDs;
 }
 
 void convertClusters(const SegmentationPair& seg,
-                     std::vector<AliESDMuonCluster*>& clusters, flatbuffers::FlatBufferBuilder& fbb)
+                     std::vector<AliESDMuonCluster*>& esdClusters, flatbuffers::FlatBufferBuilder& fbb)
 {
+  std::vector<flatbuffers::Offset<o2::mch::Cluster>> clusters;
+
+  int detElemId{0};
+
+  for (auto esdCluster : esdClusters) {
+    std::vector<int> bdigits;
+    std::vector<int> nbdigits;
+    for (int i = 0; i < esdCluster->GetNPads(); ++i) {
+      auto esdDigitID = esdCluster->GetPadId(i);
+      int de = getDetElemId(esdDigitID);
+      if (detElemId==0) {
+              detElemId=de;
+      }
+      assert(de==detElemId);
+      auto manuId = getManuId(esdDigitID);
+      auto manuChannel = getManuChannel(esdDigitID);
+      bool isBending = isBendingManu(manuId);
+      auto paduid = seg[isBending].findPadByFEE(manuId, manuChannel);
+      assert(seg[isBending].isValid());
+      if (isBending) {
+        bdigits.push_back(paduid);
+      } else {
+        nbdigits.push_back(paduid);
+      }
+    }
+
+    auto pre = CreatePreClusterDirect(fbb, &bdigits, &nbdigits);
+    auto pos = CreateClusterPos(fbb, esdCluster->GetX(),
+                                esdCluster->GetY(), esdCluster->GetZ());
+    clusters.push_back(CreateCluster(fbb, pre, pos));
+  }
+
+  if (clusters.empty()) {
+    return;
+  }
+
+  std::cout << "# clusters for DE " << detElemId << " = " << clusters.size() << "\n";
+  int ts{ 0 };
+  auto tb = CreateClusterTimeBlockDirect(fbb, ts, &clusters);
+
+  auto cde = CreateClusterDE(fbb,detElemId,fbb.CreateVector(&tb,1));
+
+  fbb.Finish(cde);
 }
 
 void convertDigits(const SegmentationPair& seg,
@@ -121,34 +184,29 @@ void convertDigits(const SegmentationPair& seg,
   std::vector<flatbuffers::Offset<o2::mch::Digit>> bendingDigits;
   std::vector<flatbuffers::Offset<o2::mch::Digit>> nonBendingDigits;
 
-  auto padIds = getPadIds(clusters);
+  auto esdDigitUIDs = getDigitUIDs(clusters);
 
   int detElemId{ 0 };
 
-  for (auto padid : padIds) {
-    detElemId = padid & 0xFFF;
-    int manuId = (padid & 0xFFF000) >> 12;
-    int manuChannel = (padid & 0x3F000000) >> 24;
-    bool isBending = ((manuId & 1024) == 0);
-    auto uid = seg[isBending].findPadByFEE(manuId, manuChannel);
-    if (!(seg[isBending].isValid(uid))) {
+  for (auto esdDigitUID : esdDigitUIDs) {
+    detElemId = getDetElemId(esdDigitUID);
+    int manuId = getManuId(esdDigitUID);
+    int manuChannel = getManuChannel(esdDigitUID);
+    bool isBending = isBendingManu(manuId);
+    auto paduid = seg[isBending].findPadByFEE(manuId, manuChannel);
+    if (!(seg[isBending].isValid(paduid))) {
       std::cout << "got invalid pad !\n";
       std::cout << "[DE" << detElemId << " MANU" << manuId << " CH "
                 << manuChannel << "]\n";
     } else {
-      auto pad = event.FindMuonPad(padid);
+      auto pad = event.FindMuonPad(esdDigitUID);
       auto adc = pad->GetADC();
       if (isBending) {
-        bendingDigits.push_back(o2::mch::CreateDigit(fbb, uid, adc));
+        bendingDigits.push_back(o2::mch::CreateDigit(fbb, paduid, adc));
       } else {
-        nonBendingDigits.push_back(o2::mch::CreateDigit(fbb, uid, adc));
+        nonBendingDigits.push_back(o2::mch::CreateDigit(fbb, paduid, adc));
       }
     }
-
-    std::cout << "\t\t[DE" << detElemId << " MANU" << manuId << " CH "
-              << manuChannel << "]";
-    // auto pad = event.FindMuonPad(padid);
-    // std::cout << pad->GetADC() << "\n";
   }
 
   if (bendingDigits.empty() && nonBendingDigits.empty()) {
