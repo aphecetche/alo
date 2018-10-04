@@ -23,7 +23,7 @@ table ClusterTimeBlock {
 
 table ClusterDE {
   detElemId: int;
-  clusterTimerBlocks:[ClusterTimeBlock];
+  clusterTimeBlocks:[ClusterTimeBlock];
 }
 
 root_type ClusterDE;

@@ -12,7 +12,7 @@ add_executable(mch-convert-esd
 target_link_libraries(mch-convert-esd PRIVATE flatbuffers::flatbuffers ROOT::RIO AliRoot::ESD o2::MCHMappingSegContour3 o2::MCHMappingImpl3 Boost::program_options)
 install(TARGETS mch-convert-esd RUNTIME DESTINATION bin)
 
-add_executable(mch-dump mch-dump.cxx SegmentationPair.cxx DumpDigits.cxx)
+add_executable(mch-dump mch-dump.cxx SegmentationPair.cxx DumpDigits.cxx DumpClusters.cxx)
 target_link_libraries(mch-dump PRIVATE flatbuffers::flatbuffers o2::MCHMappingImpl3 Boost::program_options)
 install(TARGETS mch-dump RUNTIME DESTINATION bin)
 

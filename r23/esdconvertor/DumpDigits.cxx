@@ -1,3 +1,4 @@
+#include "DumpDigits.h"
 #include "Digit_generated.h"
 #include "SegmentationPair.h"
 #include <fstream>

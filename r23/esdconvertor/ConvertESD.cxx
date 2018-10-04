@@ -167,7 +167,6 @@ void convertClusters(const SegmentationPair& seg,
     return;
   }
 
-  std::cout << "# clusters for DE " << detElemId << " = " << clusters.size() << "\n";
   int ts{ 0 };
   auto tb = CreateClusterTimeBlockDirect(fbb, ts, &clusters);
 

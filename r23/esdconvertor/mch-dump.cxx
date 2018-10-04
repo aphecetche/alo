@@ -1,5 +1,5 @@
-#include "Digit_generated.h"
 #include "DumpDigits.h"
+#include "DumpClusters.h"
 #include "SegmentationPair.h"
 #include "boost/program_options.hpp"
 #include <fstream>
@@ -39,9 +39,14 @@ int main(int argc, char** argv)
     return 2;
   }
 
-  if (digits.size()>0) {
-          dumpDigits(digits);
+  if (digits.size() > 0) {
+    dumpDigits(digits);
   }
+
+  if (clusters.size() > 0) {
+    dumpClusters(clusters);
+  }
+
   return 0;
 }
 
