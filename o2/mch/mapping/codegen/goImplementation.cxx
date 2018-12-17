@@ -43,8 +43,8 @@ import (
     "fmt"
 )
 
-func detElemID2SegType(detElemID int) (int, error) {
-    m := map[int]int{
+func detElemID2SegType(detElemID DEID) (int, error) {
+    m := map[DEID]int{
 )verbatim";
 
   for (int ide = 0; ide < detection_elements.GetArray().Size(); ++ide) {
@@ -164,10 +164,10 @@ generateCodeForSegmentationCreator(int segType, std::string codeForBendingCtor, 
 
   code << "type " << creatorName << " struct{}\n\n";
 
-  code << "func (seg " << creatorName << ") Build(isBendingPlane bool) Segmentation {\n";
+  code << "func (seg " << creatorName << ") Build(isBendingPlane bool, deid mapping.DEID ) Segmentation {\n";
 
   code << "    if isBendingPlane { \n";
-  code << "       return newSegmentation(" << segType << ", true," << codeForBendingCtor << ")\n";
+  code << "       return newSegmentation(deid," << segType << ", true," << codeForBendingCtor << ")\n";
   code << "    }\n";
   code << "    return newSegmentation(" << segType << ", false," << codeForNonBendingCtor << ")\n";
   code << "}\n\n";
