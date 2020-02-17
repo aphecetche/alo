@@ -6,9 +6,10 @@
 #include <map>
 #include "boost/format.hpp"
 
-void dumpPreCluster(const o2::mch::PreCluster& preCluster) {
-  std::cout << boost::format("%4d B and %4d NB digits") % preCluster.digitBendingIds()->Length() %
-          preCluster.digitNonBendingIds()->Length();
+void dumpPreCluster(const o2::mch::PreCluster& preCluster)
+{
+  std::cout << boost::format("%4d B and %4d NB digits") % preCluster.digitBendingIds()->size() %
+                 preCluster.digitNonBendingIds()->size();
 }
 
 void dumpCluster(const o2::mch::Cluster& cluster)
@@ -26,11 +27,11 @@ void dumpClusters(const std::string& filename)
   std::ifstream in(filename);
 
   int size;
-  int nevents{0};
+  int nevents{ 0 };
 
   while (!in.eof()) {
     in.read(reinterpret_cast<char*>(&size), sizeof(int));
-//     std::cout << "size=" << size << "\n";
+    //     std::cout << "size=" << size << "\n";
     char* buf = new char[size];
     if (in.eof()) {
       continue;
@@ -44,13 +45,13 @@ void dumpClusters(const std::string& filename)
 
     int detElemId = clusterDE->detElemId();
 
-    int nblocks = clusterDE->clusterTimeBlocks()->Length();
+    int nblocks = clusterDE->clusterTimeBlocks()->size();
 
-  //   std::cout << "DE " << detElemId << " " << nblocks << " blocks\n";
+    //   std::cout << "DE " << detElemId << " " << nblocks << " blocks\n";
 
     for (auto i = 0; i < nblocks; i++) {
       auto clusterTB = clusterDE->clusterTimeBlocks()->Get(i);
-      for (auto j = 0; j < clusterTB->clusters()->Length(); ++j) {
+      for (auto j = 0; j < clusterTB->clusters()->size(); ++j) {
         auto cluster = clusterTB->clusters()->Get(j);
         dumpCluster(*cluster);
       }
@@ -60,4 +61,3 @@ void dumpClusters(const std::string& filename)
 
   std::cout << "nevents=" << nevents << std::endl;
 }
-

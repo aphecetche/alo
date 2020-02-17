@@ -146,6 +146,26 @@ void GenerateImpl3(std::map<std::string, std::unique_ptr<InputWrapper>>& documen
   }
 }
 
+void GenerateImpl4(std::map<std::string, std::unique_ptr<InputWrapper>>& documents)
+{
+  if (documents.count("catsegs") &&
+      documents.count("motiftypes") &&
+      documents.count("padsizes") &&
+      documents.count("detection_elements") &&
+      documents.count("bergs")) {
+    Document& catsegs = documents["catsegs"]->document();
+    Document& motiftypes = documents["motiftypes"]->document();
+    Document& padsizes = documents["padsizes"]->document();
+    Document& detection_elements = documents["detection_elements"]->document();
+    Document& bergs = documents["bergs"]->document();
+    impl2::generateCodeForCathodeSegmentations("impl4", catsegs["catsegs"],
+                                               motiftypes["motiftypes"],
+                                               padsizes["padsizes"],
+                                               detection_elements["detection_elements"],
+                                               bergs["bergs"]);
+  }
+}
+
 int main(int argc, char* argv[])
 {
   po::variables_map vm;
@@ -215,8 +235,8 @@ int main(int argc, char* argv[])
     GenerateImpl2(documents);
   } else if (implToUse == 3) {
     GenerateImpl3(documents);
+  } else if (implToUse == 4) {
+    GenerateImpl4(documents);
   }
-
   return 0;
 }
-
