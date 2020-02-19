@@ -83,10 +83,12 @@ std::array<int, 64> getManu2Ds(const char* bergRun2, const char* bergRun3, bool 
   }
   for (auto b : b2manu) {
     auto berg = b.first;
-    auto manu = isdigit(b.second[0]) ? std::atoi(b.second.c_str()) : 0;
-    auto ds = isdigit(b2ds[berg][0]) ? std::atoi(b2ds[berg].c_str()) : 0;
+    auto manu = isdigit(b.second[0]) ? std::atoi(b.second.c_str()) : -1;
+    auto ds = isdigit(b2ds[berg][0]) ? std::atoi(b2ds[berg].c_str()) : -1;
     std::cout << berg << " -> " << manu << " -> " << ds << "\n";
-    manu2ds[manu] = ds;
+    if (manu >= 0) {
+      manu2ds[manu] = ds;
+    }
   }
   return manu2ds;
 }
