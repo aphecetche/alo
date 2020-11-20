@@ -81,14 +81,11 @@ bool align(TGeoManager& geom, std::string ocdb, int run)
   return false;
 }
 template <typename WRITER>
-void matrix2json(std::string name, const TGeoHMatrix& matrix, WRITER& w)
+void matrix2json(const TGeoHMatrix& matrix, WRITER& w)
 {
 
   const Double_t* t = matrix.GetTranslation();
   const Double_t* m = matrix.GetRotationMatrix();
-  w.StartObject();
-  w.Key("name");
-  w.String(name.c_str());
   w.Key("tx");
   w.Double(t[0]);
   w.Key("ty");
@@ -105,7 +102,6 @@ void matrix2json(std::string name, const TGeoHMatrix& matrix, WRITER& w)
     w.EndArray();
   }
   w.EndArray();
-  w.EndObject();
 }
 
 bool isMCH(std::string alignableName)
@@ -137,14 +133,18 @@ void exportGeom(const TGeoManager& geom)
     if (!isMCH(ae->GetName())) {
       continue;
     }
+    writer.StartObject();
+    writer.Key("name");
+    writer.String(ae->GetName());
     if (ae->GetMatrix()) {
       //ae->GetMatrix()->Print();
-      matrix2json(ae->GetName(), *ae->GetMatrix(), writer);
+      matrix2json(*ae->GetMatrix(), writer);
     }
     if (ae->GetMatrixOrig()) {
       std::cout << "WARNING : got also OrigMatrix !!";
       //ae->GetMatrixOrig()->Print();
     }
+    writer.EndObject();
   }
 
   writer.EndArray();
